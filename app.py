@@ -87,12 +87,32 @@ def delete_student(name):
    cursor = conn.cursor()
    cursor.execute("DELETE FROM students Where name = ?", (name,))
    conn.commit()
-   conn.close()
    if cursor.rowcount == 0 :
         conn.close()
         return jsonify({"message": "Student not found!"}), 404
    conn.close()
    return jsonify({"message": "Student deleted!"})
+
+
+
+@app.route("/students/<name>", methods =["PUT"])
+def update(name):
+    data = request.get_json(silent=True)
+    if not data or "grade" not in data:
+         return jsonify({"message": "missing name or grade"}), 400
+    conn = sqlite3.connect("students.db")
+    cursor = conn.cursor()
+    cursor.execute("UPDATE students SET grade = ? WHERE name = ?", (data["grade"], name))
+    conn.commit()
+    if cursor.rowcount == 0:
+        conn.close()
+        return jsonify({"message": "Student not found!"}), 404
+    conn.close()
+    return jsonify({"message": "Student updated!"}), 200
+
+
+
+
 
 
 

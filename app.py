@@ -65,7 +65,10 @@ def get_stats():
 
 @app.route("/students", methods = ["POST"])
 def add_student():
-    data = request.json
+    data = request.get_json(silent=True)
+    if not data or "name" not in data or "grade" not in data:
+        return jsonify({"message": "missing name or grade"}), 400
+ 
     name = data["name"]
     new_grade= data["grade"]
     conn = sqlite3.connect('students.db')
@@ -84,6 +87,10 @@ def delete_student(name):
    cursor = conn.cursor()
    cursor.execute("DELETE FROM students Where name = ?", (name,))
    conn.commit()
+   conn.close()
+   if cursor.rowcount == 0 :
+        conn.close()
+        return jsonify({"message": "Student not found!"}), 404
    conn.close()
    return jsonify({"message": "Student deleted!"})
 
